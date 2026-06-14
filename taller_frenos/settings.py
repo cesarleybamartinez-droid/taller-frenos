@@ -20,10 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# ADVERTENCIA DE SEGURIDAD: ¡mantén la clave secreta usada en producción en secreto!
 SECRET_KEY = 'django-insecure-=t0n3oreomn2l9u%___78x!c603gzs^a773$h-+oxr+g3-6%_9'
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# ADVERTENCIA DE SEGURIDAD: ¡no ejecutes con depuración activada en producción!
 DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -63,7 +64,7 @@ ROOT_URLCONF = 'taller_frenos.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -119,17 +120,26 @@ AUTH_USER_MODEL = 'core.Usuario'
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-do'  # para mostrar español dominicano
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Santo_Domingo'
 
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
+from django.utils.translation import gettext_lazy as _
+LANGUAGES = [
+    ('es', _('Español')),
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
 
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/clientes/'  # Cambiar cuando tengamos dashboard

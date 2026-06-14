@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>{{ cliente.nombre }}</h2>
+<div class="card mb-3">
+  <div class="card-body">
+    <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+    <p><strong>Cédula:</strong> {{ cliente.cedula|default:"No especificada" }}</p>
+    <p><strong>Correo:</strong> {{ cliente.correo|default:"No especificado" }}</p>
+    <p><strong>Dirección:</strong> {{ cliente.direccion|default:"No especificada" }}</p>
+  </div>
+</div>
+
+<h3>Vehículos</h3>
+<table class="table">
+  <thead>
+    <tr><th>Placa</th><th>Marca</th><th>Modelo</th><th>Año</th></tr>
+  </thead>
+  <tbody>
+    {% for vehiculo in vehiculos %}
+    <tr>
+      <td><a href="{% url 'clientes:vehiculo_detail' vehiculo.pk %}">{{ vehiculo.placa }}</a></td>
+      <td>{{ vehiculo.marca }}</td>
+      <td>{{ vehiculo.modelo }}</td>
+      <td>{{ vehiculo.anio }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">Sin vehículos registrados.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

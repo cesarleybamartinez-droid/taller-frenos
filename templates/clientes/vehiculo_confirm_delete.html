@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Desactivar Vehículo</h2>
+<p>¿Está seguro de desactivar el vehículo <strong>{{ object.placa }} - {{ object.marca }} {{ object.modelo }}</strong>?</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-danger">Sí, desactivar</button>
+  <a href="{% url 'clientes:vehiculo_list' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

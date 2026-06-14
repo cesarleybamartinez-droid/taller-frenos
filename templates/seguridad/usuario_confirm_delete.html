@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Desactivar Usuario</h2>
+<p>¿Está seguro de desactivar al usuario <strong>{{ object.username }}</strong>?</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-danger">Sí, desactivar</button>
+  <a href="{% url 'seguridad:usuario_list' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

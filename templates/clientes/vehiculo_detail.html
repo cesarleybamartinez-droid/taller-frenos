@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Vehículo {{ vehiculo.placa }}</h2>
+<div class="card mb-3">
+  <div class="card-body">
+    <p><strong>Marca:</strong> {{ vehiculo.marca }}</p>
+    <p><strong>Modelo:</strong> {{ vehiculo.modelo }}</p>
+    <p><strong>Año:</strong> {{ vehiculo.anio }}</p>
+    <p><strong>Color:</strong> {{ vehiculo.color|default:"No especificado" }}</p>
+    <p><strong>Chasis:</strong> {{ vehiculo.chasis|default:"No especificado" }}</p>
+    <p><strong>Tipo de frenos:</strong> {{ vehiculo.tipo_frenos|default:"No especificado" }}</p>
+    <p><strong>Cliente:</strong> {{ vehiculo.cliente.nombre }}</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Roles</h2>
+<table class="table table-striped">
+  <thead class="table-dark">
+    <tr>
+      <th>Rol</th>
+      <th>Permisos actuales</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for rol in roles %}
+    <tr>
+      <td>{{ rol.nombre }}</td>
+      <td>
+        {% for rp in rol.rolpermiso_set.all %}
+          <span class="badge bg-info me-1">{{ rp.permiso.nombre }}</span>
+        {% empty %}
+          <span class="text-muted">Sin permisos</span>
+        {% endfor %}
+      </td>
+      <td>
+        <a href="{% url 'seguridad:rol_permisos' rol.pk %}" class="btn btn-sm btn-warning">
+          <i class="bi bi-pencil"></i> Editar permisos
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

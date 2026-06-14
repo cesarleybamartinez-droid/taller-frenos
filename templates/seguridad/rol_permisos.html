@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h2>Editar permisos del rol: {{ rol.nombre }}</h2>  <!-- Obtén el nombre del rol si lo necesitas -->
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Permisos disponibles</label>
+      <div class="row">
+        {% for checkbox in form.permisos %}
+        <div class="col-md-4">
+          <div class="form-check">
+            {{ checkbox.tag }}
+            <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+              {{ checkbox.choice_label }}
+            </label>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Guardar</button>
+    <a href="{% url 'seguridad:rol_list' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}
