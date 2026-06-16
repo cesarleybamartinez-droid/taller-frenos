@@ -125,7 +125,8 @@ class VehiculoDetailView(LoginRequiredMixin, DetailView):
 
 
 class VehiculoDeleteView(LoginRequiredMixin, TienePermisoMixin, UpdateView):
-    permiso = 'desactivar_usuario'    """Desactiva un vehículo (eliminación lógica) y muestra un mensaje."""
+    """Desactiva un vehículo (eliminación lógica) y muestra un mensaje."""
+    permiso = 'desactivar_usuario'
     model = Vehiculo
     fields = []
     template_name = 'clientes/vehiculo_confirm_delete.html'
