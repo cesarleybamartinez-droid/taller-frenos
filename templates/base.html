@@ -46,6 +46,12 @@
                         <i class="bi bi-car-front me-2"></i> Vehículos
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{% url 'inventario:repuesto_list' %}" 
+                        class="nav-link {% if '/inventario/' in request.path %}active{% endif %}">
+                        <i class="bi bi-box-seam me-2"></i> Inventario
+                    </a>
+                 </li>
                 {% if request.user.rol.nombre == 'Propietario' %}
                 <li class="nav-item mt-3">
                     <span class="text-muted ms-2">ADMINISTRACIÓN</span>

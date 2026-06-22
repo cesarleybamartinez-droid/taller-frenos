@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Inventario</h2>
+  <div>
+    {% if request.user.rol.nombre != 'Recepcionista' %}
+    <a href="{% url 'inventario:repuesto_create' %}" class="btn btn-primary">
+      <i class="bi bi-plus-lg"></i> Nuevo Repuesto
+    </a>
+    <a href="{% url 'inventario:ajuste_stock' %}" class="btn btn-secondary">
+      <i class="bi bi-arrow-repeat"></i> Ajuste de stock
+    </a>
+    {% endif %}
+    <a href="{% url 'inventario:movimiento_list' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-clock-history"></i> Movimientos
+    </a>
+  </div>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-6">
+    <input type="text" name="search" class="form-control" placeholder="Buscar por código o descripción" value="{{ request.GET.search }}">
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-secondary">Buscar</button>
+  </div>
+</form>
+
+<table class="table table-striped table-hover">
+  <thead class="table-dark">
+    <tr>
+      <th>Código</th>
+      <th>Descripción</th>
+      <th>Categoría</th>
+      <th>Stock</th>
+      <th>Mínimo</th>
+      <th>Precio Venta</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for repuesto in repuestos %}
+    <tr class="{% if repuesto.stock_bajo %}table-danger{% endif %}">
+      <td>{{ repuesto.codigo }}</td>
+      <td>{{ repuesto.descripcion }}</td>
+      <td>{{ repuesto.categoria.nombre }}</td>
+      <td>{{ repuesto.stock_actual }}</td>
+      <td>{{ repuesto.stock_minimo }}</td>
+      <td>RD$ {{ repuesto.precio_venta|floatformat:2 }}</td>
+      <td>
+        <a href="{% url 'inventario:repuesto_detail' repuesto.pk %}" class="btn btn-sm btn-info" title="Ver"><i class="bi bi-eye"></i></a>
+        {% if request.user.rol.nombre != 'Recepcionista' %}
+        <a href="{% url 'inventario:repuesto_update' repuesto.pk %}" class="btn btn-sm btn-warning" title="Editar"><i class="bi bi-pencil"></i></a>
+        {% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" class="text-center">No hay repuestos registrados.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -45,6 +45,11 @@ INSTALLED_APPS = [
     'seguridad',          
     'core',
     'clientes',
+    'inventario',
+    'compras',
+    'ordenes',
+    'finanzas',
+    'reportes',
     
 ]
 

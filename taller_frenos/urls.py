@@ -8,4 +8,5 @@ urlpatterns = [
     path('logout/', cerrar_sesion, name='logout'),   # <-- ahora usa GET
     path('clientes/', include('clientes.urls')),
     path('seguridad/', include('seguridad.urls')),
+    path('inventario/', include('inventario.urls')),
 ]
