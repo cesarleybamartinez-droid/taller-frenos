@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Orden #{{ orden.id }} <span class="badge {% if orden.estado == 'Entregada' %}bg-success{% elif orden.estado == 'Cancelada' %}bg-danger{% elif orden.estado == 'En Progreso' %}bg-warning{% else %}bg-secondary{% endif %}">{{ orden.estado }}</span></h2>
+  <div>
+    {% if puede_editar %}
+    <a href="{% url 'ordenes:agregar_servicio' orden.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-tools"></i> Agregar servicio</a>
+    <a href="{% url 'ordenes:agregar_repuesto' orden.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-box-seam"></i> Agregar repuesto</a>
+    {% endif %}
+    <a href="{% url 'ordenes:cambiar_estado' orden.pk %}" class="btn btn-outline-warning btn-sm"><i class="bi bi-arrow-repeat"></i> Cambiar estado</a>
+    {% if orden.estado not in 'Entregada,Cancelada' %}
+    <a href="{% url 'ordenes:registrar_pago' orden.pk %}" class="btn btn-outline-success btn-sm"><i class="bi bi-cash"></i> Registrar pago</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5>Datos del vehículo</h5>
+        <p><strong>Placa:</strong> {{ orden.vehiculo.placa }}</p>
+        <p><strong>Vehículo:</strong> {{ orden.vehiculo.marca }} {{ orden.vehiculo.modelo }} ({{ orden.vehiculo.anio }})</p>
+        <p><strong>Cliente:</strong> {{ orden.cliente.nombre }}</p>
+        <p><strong>Teléfono:</strong> {{ orden.cliente.telefono }}</p>
+        <p><strong>Ingreso:</strong> {{ orden.fecha_ingreso|date:"d/m/Y H:i" }}</p>
+        <p><strong>Entrega estimada:</strong> {{ orden.fecha_estimada_entrega|date:"d/m/Y"|default:"No definida" }}</p>
+        <p><strong>Diagnóstico:</strong> {{ orden.diagnostico|default:"No registrado" }}</p>
+        <p><strong>Observaciones:</strong> {{ orden.observaciones|default:"Ninguna" }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5>Totales</h5>
+        <p>Subtotal repuestos: RD$ {{ orden.subtotal_repuestos|floatformat:2 }}</p>
+        <p>Subtotal servicios: RD$ {{ orden.subtotal_servicios|floatformat:2 }}</p>
+        <p>Descuento: RD$ {{ orden.descuento|floatformat:2 }}</p>
+        <p>ITBIS (18%): RD$ {{ orden.itbis|floatformat:2 }}</p>
+        <hr>
+        <h4>Total: RD$ {{ orden.total|floatformat:2 }}</h4>
+        <p>Total pagado: RD$ {{ orden.total_pagado|floatformat:2 }}</p>
+        <p class="fw-bold">Saldo pendiente: RD$ {{ orden.saldo_pendiente|floatformat:2 }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h4>Servicios realizados</h4>
+<table class="table table-sm">
+  <thead><tr><th>Servicio</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th><th>Acciones</th></tr></thead>
+  <tbody>
+    {% for det in detalles_servicios %}
+    <tr>
+      <td>{{ det.servicio.nombre }}</td>
+      <td>{{ det.cantidad }}</td>
+      <td>RD$ {{ det.precio_unitario }}</td>
+      <td>RD$ {{ det.subtotal }}</td>
+      <td>
+        {% if puede_editar %}
+        <a href="{% url 'ordenes:editar_servicio' orden.pk det.pk %}" class="btn btn-sm btn-outline-warning" title="Editar"><i class="bi bi-pencil"></i></a>
+        <a href="{% url 'ordenes:eliminar_servicio' orden.pk det.pk %}" class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></a>
+        {% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No se han agregado servicios.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h4>Repuestos utilizados</h4>
+<table class="table table-sm">
+  <thead><tr><th>Repuesto</th><th>Cantidad</th><th>Precio Unit.</th><th>Subtotal</th><th>Acciones</th></tr></thead>
+  <tbody>
+    {% for det in detalles_repuestos %}
+    <tr>
+      <td>{{ det.repuesto.descripcion }} ({{ det.repuesto.codigo }})</td>
+      <td>{{ det.cantidad }}</td>
+      <td>RD$ {{ det.precio_unitario }}</td>
+      <td>RD$ {{ det.subtotal }}</td>
+      <td>
+        {% if puede_editar %}
+        <a href="{% url 'ordenes:editar_repuesto' orden.pk det.pk %}" class="btn btn-sm btn-outline-warning" title="Editar"><i class="bi bi-pencil"></i></a>
+        <a href="{% url 'ordenes:eliminar_repuesto' orden.pk det.pk %}" class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></a>
+        {% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">No se han agregado repuestos.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h4>Pagos registrados</h4>
+<table class="table table-sm">
+  <thead><tr><th>Fecha</th><th>Monto</th><th>Método</th></tr></thead>
+  <tbody>
+    {% for pago in pagos %}
+    <tr><td>{{ pago.fecha|date:"d/m/Y H:i" }}</td><td>RD$ {{ pago.monto }}</td><td>{{ pago.metodo }}</td></tr>
+    {% empty %}
+    <tr><td colspan="3">No se han registrado pagos.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

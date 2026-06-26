@@ -3,14 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taller de Frenos · Gestión</title>
+    <title>Taller de Frenos los 3 Hermanos · Gestión</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        /* Estilos unificados del sidebar */
+        /* Variable para el ancho del sidebar */
+        :root {
+            --sidebar-width: 230px;
+        }
+
+        /* Estilos del sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-width: 180px;
+            max-width: 400px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #1e2a3a 0%, #0f1722 100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        /* Estilos de los enlaces del sidebar */
         .sidebar .nav-link {
             color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            margin: 4px 12px;
+            border-radius: 8px;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            text-decoration: none;
         }
         .sidebar .nav-link:hover {
             background-color: #0d6efd;
@@ -22,14 +51,43 @@
             color: white;
             font-weight: 500;
         }
+
+        /* Asa de redimensión */
+        #sidebar-resize-handle {
+            width: 5px;
+            background: transparent;
+            cursor: col-resize;
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            bottom: 0;
+            z-index: 1001;
+            transition: background 0.2s;
+        }
+        #sidebar-resize-handle:hover {
+            background: rgba(13, 110, 253, 0.4);
+        }
+
+        /* Contenido principal */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        /* Evitar selección de texto al redimensionar */
+        body.resizing {
+            user-select: none;
+            cursor: col-resize;
+        }
     </style>
 </head>
 <body>
     <div class="d-flex" id="wrapper">
         <!-- Sidebar -->
-        <!-- Añadida la clase 'sidebar' al nav -->
-        <nav class="sidebar bg-dark text-white p-3" style="min-width: 230px; min-height: 100vh;">
-            <h4 class="text-center">Taller Frenos</h4>
+        <nav id="sidebar" class="sidebar bg-dark text-white p-3">
+            <h4 class="text-center">Taller de Frenos Los 3 Hermanos</h4>
             <hr>
             <ul class="nav flex-column">
                 <!-- Clientes -->
@@ -46,12 +104,20 @@
                         <i class="bi bi-car-front me-2"></i> Vehículos
                     </a>
                 </li>
+                <!-- Órdenes de Trabajo -->
+                <li class="nav-item">
+                    <a href="{% url 'ordenes:orden_list' %}" 
+                       class="nav-link {% if '/ordenes/' in request.path %}active{% endif %}">
+                        <i class="bi bi-card-checklist me-2"></i> Órdenes de Trabajo
+                    </a>
+                </li>
+                <!-- Inventario -->
                 <li class="nav-item">
                     <a href="{% url 'inventario:repuesto_list' %}" 
                         class="nav-link {% if '/inventario/' in request.path %}active{% endif %}">
                         <i class="bi bi-box-seam me-2"></i> Inventario
                     </a>
-                 </li>
+                </li>
                 {% if request.user.rol.nombre == 'Propietario' %}
                 <li class="nav-item mt-3">
                     <span class="text-muted ms-2">ADMINISTRACIÓN</span>
@@ -81,8 +147,11 @@
             </ul>
         </nav>
 
+        <!-- Asa de redimensión -->
+        <div id="sidebar-resize-handle"></div>
+
         <!-- Contenido principal -->
-        <main class="container-fluid p-4">
+        <main class="main-content">
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -98,5 +167,54 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.0/dist/cdn.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+    (function() {
+        const root = document.documentElement;
+        const sidebar = document.getElementById('sidebar');
+        const handle = document.getElementById('sidebar-resize-handle');
+        const mainContent = document.querySelector('.main-content');
+        let isResizing = false;
+        let startX, startWidth;
+
+        function updateWidths(newWidth) {
+            const clampedWidth = Math.min(400, Math.max(180, newWidth));
+            root.style.setProperty('--sidebar-width', clampedWidth + 'px');
+            mainContent.style.marginLeft = clampedWidth + 'px';
+            mainContent.style.width = 'calc(100% - ' + clampedWidth + 'px)';
+        }
+
+        // Inicializar
+        updateWidths(sidebar.offsetWidth);
+
+        handle.addEventListener('mousedown', function(e) {
+            isResizing = true;
+            startX = e.clientX;
+            startWidth = sidebar.offsetWidth;
+            document.body.classList.add('resizing');
+            e.preventDefault();
+        });
+
+        window.addEventListener('mousemove', function(e) {
+            if (!isResizing) return;
+            const delta = e.clientX - startX;
+            const newWidth = startWidth + delta;
+            updateWidths(newWidth);
+        });
+
+        window.addEventListener('mouseup', function() {
+            if (!isResizing) return;
+            isResizing = false;
+            document.body.classList.remove('resizing');
+        });
+
+        window.addEventListener('mouseleave', function() {
+            if (isResizing) {
+                isResizing = false;
+                document.body.classList.remove('resizing');
+            }
+        });
+    })();
+    </script>
 </body>
 </html>

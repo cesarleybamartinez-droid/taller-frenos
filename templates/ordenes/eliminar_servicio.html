@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h2>Eliminar Servicio</h2>
+  <p>¿Está seguro de eliminar el servicio <strong>{{ object.servicio.nombre }}</strong> de la orden #{{ object.orden_id }}?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+    <a href="{% url 'ordenes:orden_detail' object.orden_id %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

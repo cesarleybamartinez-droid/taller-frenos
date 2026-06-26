@@ -28,3 +28,16 @@ class Auditoria(models.Model):
     accion = models.CharField(max_length=100)
     descripcion = models.TextField(null=True, blank=True)
     fecha_hora = models.DateTimeField(auto_now_add=True)
+    
+class Auditoria(models.Model):
+    usuario = models.ForeignKey('core.Usuario', on_delete=models.CASCADE)
+    accion = models.CharField(max_length=100)
+    descripcion = models.TextField(null=True, blank=True)
+    fecha_hora = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Auditoría"
+        verbose_name_plural = "Auditorías"
+
+    def __str__(self):
+        return f"{self.fecha_hora} - {self.usuario.username} - {self.accion}"

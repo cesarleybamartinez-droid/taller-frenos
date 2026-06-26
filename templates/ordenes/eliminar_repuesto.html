@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h2>Eliminar Repuesto</h2>
+  <p>¿Está seguro de eliminar el repuesto <strong>{{ object.repuesto.descripcion }}</strong> de la orden #{{ object.orden_id }}?</p>
+  <p class="text-warning"><i class="bi bi-exclamation-triangle"></i> Se reintegrará la cantidad al inventario.</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+    <a href="{% url 'ordenes:orden_detail' object.orden_id %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}
