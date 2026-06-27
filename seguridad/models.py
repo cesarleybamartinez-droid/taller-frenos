@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 class Rol(models.Model):
     nombre = models.CharField(max_length=50, unique=True)
@@ -24,17 +25,11 @@ class RolPermiso(models.Model):
         unique_together = ('rol', 'permiso')
 
 class Auditoria(models.Model):
-    usuario = models.ForeignKey('core.Usuario', on_delete=models.CASCADE)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     accion = models.CharField(max_length=100)
     descripcion = models.TextField(null=True, blank=True)
     fecha_hora = models.DateTimeField(auto_now_add=True)
     
-class Auditoria(models.Model):
-    usuario = models.ForeignKey('core.Usuario', on_delete=models.CASCADE)
-    accion = models.CharField(max_length=100)
-    descripcion = models.TextField(null=True, blank=True)
-    fecha_hora = models.DateTimeField(auto_now_add=True)
-
     class Meta:
         verbose_name = "Auditoría"
         verbose_name_plural = "Auditorías"
