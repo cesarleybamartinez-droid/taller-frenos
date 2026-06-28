@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.db import IntegrityError
-from clientes.models import Cliente, Vehiculo
+from clientes.models import Cliente, Vehiculo, Marca, ModeloVehiculo
 from django.db import transaction
 
 class ClienteModelTest(TestCase):
@@ -68,27 +68,44 @@ class ClienteModelTest(TestCase):
 
 # Create your tests here.
 class VehiculoModelTest(TestCase):
-    """Pruebas unitarias para el modelo Vehiculo."""
+    """Pruebas unitarias para el modelo Vehiculo (con FK a Marca y ModeloVehiculo)."""
 
     def setUp(self):
-        """Crea un cliente que se usará como referencia en las pruebas."""
+        """Crea un cliente y las marcas/modelos necesarios para las pruebas."""
         self.cliente = Cliente.objects.create(
             nombre="Cliente Genérico",
             telefono="8095550000"
         )
+        # Marcas
+        self.toyota = Marca.objects.create(nombre="Toyota")
+        self.honda = Marca.objects.create(nombre="Honda")
+        self.hyundai = Marca.objects.create(nombre="Hyundai")
+        self.kia = Marca.objects.create(nombre="Kia")
+        self.nissan = Marca.objects.create(nombre="Nissan")
+        self.zeta = Marca.objects.create(nombre="Zeta")
+        self.alfa = Marca.objects.create(nombre="Alfa")
+        # Modelos
+        self.corolla = ModeloVehiculo.objects.create(nombre="Corolla", marca=self.toyota)
+        self.civic = ModeloVehiculo.objects.create(nombre="Civic", marca=self.honda)
+        self.tucson = ModeloVehiculo.objects.create(nombre="Tucson", marca=self.hyundai)
+        self.rio = ModeloVehiculo.objects.create(nombre="Rio", marca=self.kia)
+        self.sentra = ModeloVehiculo.objects.create(nombre="Sentra", marca=self.nissan)
+        self.yaris = ModeloVehiculo.objects.create(nombre="Yaris", marca=self.toyota)
+        self.modelo_a = ModeloVehiculo.objects.create(nombre="A", marca=self.zeta)
+        self.modelo_b = ModeloVehiculo.objects.create(nombre="B", marca=self.alfa)
 
     def test_crear_vehiculo_valido(self):
         """Verifica que se pueda crear un vehículo con los campos obligatorios."""
         vehiculo = Vehiculo.objects.create(
             placa="A123456",
-            marca="Toyota",
-            modelo="Corolla",
+            marca=self.toyota,
+            modelo=self.corolla,
             anio=2020,
             cliente=self.cliente
         )
         self.assertEqual(vehiculo.placa, "A123456")
-        self.assertEqual(vehiculo.marca, "Toyota")
-        self.assertEqual(vehiculo.modelo, "Corolla")
+        self.assertEqual(vehiculo.marca, self.toyota)
+        self.assertEqual(vehiculo.modelo, self.corolla)
         self.assertEqual(vehiculo.anio, 2020)
         self.assertTrue(vehiculo.activo)
         self.assertIsNone(vehiculo.chasis)
@@ -97,36 +114,38 @@ class VehiculoModelTest(TestCase):
     def test_placa_unica(self):
         """Verifica que no se pueda duplicar la placa."""
         Vehiculo.objects.create(
-            placa="A123456", marca="Toyota", modelo="Corolla",
+            placa="A123456", marca=self.toyota, modelo=self.corolla,
             anio=2020, cliente=self.cliente
         )
         with self.assertRaises(IntegrityError):
             Vehiculo.objects.create(
-                placa="A123456", marca="Honda", modelo="Civic",
+                placa="A123456", marca=self.honda, modelo=self.civic,
                 anio=2021, cliente=self.cliente
             )
 
     def test_chasis_unico_opcional(self):
         """Verifica que el chasis sea único si se proporciona, pero permita nulos."""
         Vehiculo.objects.create(
-            placa="Z0001", marca="Toyota", modelo="Yaris",
+            placa="Z0001", marca=self.toyota, modelo=self.yaris,
             anio=2019, cliente=self.cliente, chasis="CHASIS001"
         )
+        # Intentar otro con el mismo chasis debe fallar
         with self.assertRaises(IntegrityError):
             with transaction.atomic():
                 Vehiculo.objects.create(
-                    placa="Z0002", marca="Honda", modelo="Fit",
+                    placa="Z0002", marca=self.honda, modelo=self.civic,
                     anio=2020, cliente=self.cliente, chasis="CHASIS001"
                 )
+        # Vehículo sin chasis debe ser permitido
         Vehiculo.objects.create(
-            placa="Z0003", marca="Ford", modelo="Focus",
+            placa="Z0003", marca=self.nissan, modelo=self.sentra,
             anio=2021, cliente=self.cliente
-        )
+        )   # chasis=None
 
     def test_relacion_cliente(self):
         """Verifica la relación con el cliente."""
         vehiculo = Vehiculo.objects.create(
-            placa="B9999", marca="Nissan", modelo="Sentra",
+            placa="B9999", marca=self.nissan, modelo=self.sentra,
             anio=2022, cliente=self.cliente
         )
         self.assertEqual(vehiculo.cliente, self.cliente)
@@ -135,16 +154,16 @@ class VehiculoModelTest(TestCase):
     def test_str_method(self):
         """Verifica el método __str__."""
         vehiculo = Vehiculo.objects.create(
-            placa="C5555", marca="Kia", modelo="Rio",
+            placa="C5555", marca=self.kia, modelo=self.rio,
             anio=2023, cliente=self.cliente
         )
-        esperado = "C5555 - Kia Rio (2023)"
+        esperado = f"C5555 - {self.kia.nombre} {self.rio.nombre} (2023)"
         self.assertEqual(str(vehiculo), esperado)
 
     def test_eliminacion_logica(self):
         """Verifica que la eliminación lógica funcione."""
         vehiculo = Vehiculo.objects.create(
-            placa="D4444", marca="Hyundai", modelo="Tucson",
+            placa="D4444", marca=self.hyundai, modelo=self.tucson,
             anio=2021, cliente=self.cliente
         )
         vehiculo.activo = False
@@ -155,11 +174,13 @@ class VehiculoModelTest(TestCase):
     def test_orden_por_defecto(self):
         """Verifica el orden por marca y modelo."""
         Vehiculo.objects.create(
-            placa="ORD1", marca="Zeta", modelo="A", anio=2020, cliente=self.cliente
+            placa="ORD1", marca=self.zeta, modelo=self.modelo_a,
+            anio=2020, cliente=self.cliente
         )
         Vehiculo.objects.create(
-            placa="ORD2", marca="Alfa", modelo="B", anio=2021, cliente=self.cliente
+            placa="ORD2", marca=self.alfa, modelo=self.modelo_b,
+            anio=2021, cliente=self.cliente
         )
         vehiculos = Vehiculo.objects.all()
-        self.assertEqual(vehiculos[0].marca, "Alfa")
-        self.assertEqual(vehiculos[1].marca, "Zeta")
+        self.assertEqual(vehiculos[0].marca, self.alfa)
+        self.assertEqual(vehiculos[1].marca, self.zeta)

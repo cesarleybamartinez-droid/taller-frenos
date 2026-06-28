@@ -15,4 +15,5 @@ urlpatterns = [
     path('<int:orden_pk>/eliminar-servicio/<int:pk>/', views.EliminarServicioView.as_view(), name='eliminar_servicio'),
     path('<int:orden_pk>/editar-repuesto/<int:pk>/', views.EditarRepuestoView.as_view(), name='editar_repuesto'),
     path('<int:orden_pk>/eliminar-repuesto/<int:pk>/', views.EliminarRepuestoView.as_view(), name='eliminar_repuesto'),
+    path('api/precio-servicio/', views.get_precio_servicio, name='api_precio_servicio'),
 ]

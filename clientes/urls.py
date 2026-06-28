@@ -17,4 +17,7 @@ urlpatterns = [
     path('vehiculos/<int:pk>/', views.VehiculoDetailView.as_view(), name='vehiculo_detail'),
     path('vehiculos/<int:pk>/editar/', views.VehiculoUpdateView.as_view(), name='vehiculo_update'),
     path('vehiculos/<int:pk>/eliminar/', views.VehiculoDeleteView.as_view(), name='vehiculo_delete'),
+
+    path('api/modelos/', views.get_modelos_por_marca, name='api_modelos'),
+
 ]

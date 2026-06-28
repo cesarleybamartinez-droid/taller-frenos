@@ -7,8 +7,11 @@
     <a href="{% url 'ordenes:agregar_servicio' orden.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-tools"></i> Agregar servicio</a>
     <a href="{% url 'ordenes:agregar_repuesto' orden.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-box-seam"></i> Agregar repuesto</a>
     {% endif %}
-    <a href="{% url 'ordenes:cambiar_estado' orden.pk %}" class="btn btn-outline-warning btn-sm"><i class="bi bi-arrow-repeat"></i> Cambiar estado</a>
-    {% if orden.estado not in 'Entregada,Cancelada' %}
+{% if orden.estado != 'Entregada' and orden.estado != 'Cancelada' %}
+<a href="{% url 'ordenes:cambiar_estado' orden.pk %}" class="btn btn-outline-warning btn-sm">
+    <i class="bi bi-arrow-repeat"></i> Cambiar estado
+</a>
+{% endif %}    {% if orden.estado not in 'Entregada,Cancelada' %}
     <a href="{% url 'ordenes:registrar_pago' orden.pk %}" class="btn btn-outline-success btn-sm"><i class="bi bi-cash"></i> Registrar pago</a>
     {% endif %}
   </div>

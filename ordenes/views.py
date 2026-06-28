@@ -12,6 +12,8 @@ from django.views.generic import ListView, CreateView, UpdateView, DetailView, V
 from core.mixins import TienePermisoMixin
 from .models import OrdenTrabajo, DetalleServicio, DetalleRepuesto, Pago, Servicio
 from inventario.models import Repuesto, MovimientoInventario
+from django.http import JsonResponse
+from .models import Servicio
 from .forms import (
     OrdenTrabajoForm,
     DetalleServicioForm,
@@ -211,6 +213,12 @@ class RegistrarPagoView(LoginRequiredMixin, CreateView):
     form_class = PagoForm
     template_name = 'ordenes/registrar_pago.html'
 
+    def get_initial(self):
+        initial = super().get_initial()
+        orden = get_object_or_404(OrdenTrabajo, pk=self.kwargs['orden_pk'])
+        initial['monto'] = orden.saldo_pendiente
+        return initial
+    
     def form_valid(self, form):
         orden = get_object_or_404(OrdenTrabajo, pk=self.kwargs['orden_pk'])
         form.instance.orden = orden
@@ -395,6 +403,16 @@ class EliminarRepuestoView(LoginRequiredMixin, DeleteView):
         orden.itbis = orden.total * Decimal('0.18')
         orden.total += orden.itbis
         orden.save()
+    
+def get_precio_servicio(request):
+    servicio_id = request.GET.get('servicio_id')
+    if servicio_id:
+        try:
+            servicio = Servicio.objects.get(pk=servicio_id)
+            return JsonResponse({'precio': str(servicio.precio_estandar)})
+        except Servicio.DoesNotExist:
+            pass
+    return JsonResponse({'precio': '0.00'})
         
     def get_success_url(self):
         return reverse('ordenes:orden_detail', kwargs={'pk': self.kwargs['orden_pk']})

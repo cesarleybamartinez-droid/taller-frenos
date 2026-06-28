@@ -1,5 +1,5 @@
 from django import forms
-from .models import Cliente, Vehiculo
+from .models import Cliente, Vehiculo, ModeloVehiculo   # ← añade ModeloVehiculo
 
 class ClienteForm(forms.ModelForm):
     """Formulario para crear y editar clientes."""
@@ -37,10 +37,26 @@ class VehiculoForm(forms.ModelForm):
         widgets = {
             'cliente': forms.Select(attrs={'class': 'form-control'}),
             'placa': forms.TextInput(attrs={'class': 'form-control'}),
-            'marca': forms.TextInput(attrs={'class': 'form-control'}),
-            'modelo': forms.TextInput(attrs={'class': 'form-control'}),
+            'marca': forms.Select(attrs={'class': 'form-control', 'id': 'id_marca'}),
+            'modelo': forms.Select(attrs={'class': 'form-control', 'id': 'id_modelo'}),
             'anio': forms.NumberInput(attrs={'class': 'form-control'}),
             'color': forms.TextInput(attrs={'class': 'form-control'}),
             'chasis': forms.TextInput(attrs={'class': 'form-control'}),
             'tipo_frenos': forms.Select(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Inicialmente, el campo modelo no muestra opciones (se llenará con JS)
+        self.fields['modelo'].queryset = ModeloVehiculo.objects.none()
+
+        # Si se está enviando el formulario con una marca seleccionada (POST)
+        if 'marca' in self.data:
+            try:
+                marca_id = int(self.data.get('marca'))
+                self.fields['modelo'].queryset = ModeloVehiculo.objects.filter(marca_id=marca_id)
+            except (ValueError, TypeError):
+                pass
+        # Si es una edición (el objeto ya tiene marca guardada)
+        elif self.instance.pk and self.instance.marca:
+            self.fields['modelo'].queryset = self.instance.marca.modelos.all()

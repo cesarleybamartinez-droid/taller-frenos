@@ -22,14 +22,13 @@ class OrdenTrabajoForm(forms.ModelForm):
 
 
 class DetalleServicioForm(forms.ModelForm):
-    """Formulario para agregar un servicio a la orden."""
     class Meta:
         model = DetalleServicio
         fields = ['servicio', 'cantidad', 'precio_unitario']
         widgets = {
-            'servicio': forms.Select(attrs={'class': 'form-control'}),
+            'servicio': forms.Select(attrs={'class': 'form-control', 'id': 'id_servicio'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
-            'precio_unitario': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'precio_unitario': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'id': 'id_precio_unitario'}),
         }
         labels = {
             'servicio': 'Servicio',

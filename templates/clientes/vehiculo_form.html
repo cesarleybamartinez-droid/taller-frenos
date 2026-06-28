@@ -14,4 +14,30 @@
     </div>
   </form>
 </div>
-{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const marcaSelect = document.getElementById('id_marca');
+    const modeloSelect = document.getElementById('id_modelo');
+
+    marcaSelect.addEventListener('change', function() {
+        const marcaId = this.value;
+        // Limpiar opciones actuales
+        modeloSelect.innerHTML = '<option value="">---------</option>';
+
+        if (marcaId) {
+            fetch(`/clientes/api/modelos/?marca_id=${marcaId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(modelo => {
+                        const option = document.createElement('option');
+                        option.value = modelo.id;
+                        option.textContent = modelo.nombre;
+                        modeloSelect.appendChild(option);
+                    });
+                });
+        }
+    });
+});
+</script>
+{% endblock content %}

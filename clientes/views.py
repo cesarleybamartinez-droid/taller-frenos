@@ -1,3 +1,5 @@
+from urllib import request
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -7,7 +9,15 @@ from django.db.models import Q
 from .models import Cliente, Vehiculo
 from .forms import ClienteForm, VehiculoForm
 from core.mixins import TienePermisoMixin
+from django.http import JsonResponse
+from .models import ModeloVehiculo
 
+def get_modelos_por_marca(request):
+    marca_id = request.GET.get('marca_id')
+    if marca_id:
+        modelos = ModeloVehiculo.objects.filter(marca_id=marca_id).values('id', 'nombre')
+        return JsonResponse(list(modelos), safe=False)
+    return JsonResponse([], safe=False)
 
 # --- Vistas de Cliente ---
 class ClienteListView(LoginRequiredMixin, ListView):
@@ -137,3 +147,10 @@ class VehiculoDeleteView(LoginRequiredMixin, TienePermisoMixin, UpdateView):
         self.object.activo = False
         self.object.save()
         return super().form_valid(form)
+    
+    def get_modelos_por_marca(request):
+        marca_id = request.GET.get('marca_id')
+        if marca_id:
+            modelos = ModeloVehiculo.objects.filter(marca_id=marca_id).values('id', 'nombre')
+        return JsonResponse(list(modelos), safe=False)
+        return JsonResponse([], safe=False)

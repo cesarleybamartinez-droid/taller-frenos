@@ -13,4 +13,25 @@
     </div>
   </form>
 </div>
-{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const servicioSelect = document.getElementById('id_servicio');
+    const precioInput = document.getElementById('id_precio_unitario');
+
+    servicioSelect.addEventListener('change', function() {
+        const servicioId = this.value;
+        if (servicioId) {
+            fetch(`/ordenes/api/precio-servicio/?servicio_id=${servicioId}`)
+                .then(response => response.json())
+                .then(data => {
+                    precioInput.value = data.precio;
+                });
+        } else {
+            precioInput.value = '';
+        }
+    });
+});
+</script>
+
+{% endblock content %}
