@@ -14,6 +14,8 @@ from .models import OrdenTrabajo, DetalleServicio, DetalleRepuesto, Pago, Servic
 from inventario.models import Repuesto, MovimientoInventario
 from django.http import JsonResponse
 from .models import Servicio
+from core.mixins import TienePermisoMixin, OrdenYPaginacionMixin
+from django.db.models import Q
 from .forms import (
     OrdenTrabajoForm,
     DetalleServicioForm,
@@ -25,11 +27,12 @@ from .forms import (
 
 
 # --- LISTA DE ÓRDENES ---
-class OrdenListView(LoginRequiredMixin, ListView):
+class OrdenListView(LoginRequiredMixin, OrdenYPaginacionMixin, ListView):
     model = OrdenTrabajo
     template_name = 'ordenes/orden_list.html'
     context_object_name = 'ordenes'
-    paginate_by = 20
+    ordering_allowed = {'id': 'id', 'fecha_ingreso': 'fecha_ingreso', 'total': 'total', 'estado': 'estado'}
+    ordering_default = '-fecha_ingreso'
 
     def get_queryset(self):
         queryset = OrdenTrabajo.objects.select_related('vehiculo__cliente').all()
@@ -37,7 +40,6 @@ class OrdenListView(LoginRequiredMixin, ListView):
         fecha_inicio = self.request.GET.get('fecha_inicio', '')
         fecha_fin = self.request.GET.get('fecha_fin', '')
         search = self.request.GET.get('search', '')
-
         if estado:
             queryset = queryset.filter(estado=estado)
         if fecha_inicio:
@@ -46,8 +48,8 @@ class OrdenListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(fecha_ingreso__date__lte=fecha_fin)
         if search:
             queryset = queryset.filter(
-                db_models.Q(vehiculo__placa__icontains=search) |
-                db_models.Q(vehiculo__cliente__nombre__icontains=search)
+                Q(vehiculo__placa__icontains=search) |
+                Q(vehiculo__cliente__nombre__icontains=search)
             )
         return queryset
 

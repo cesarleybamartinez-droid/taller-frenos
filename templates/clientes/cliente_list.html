@@ -2,24 +2,58 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h2>Clientes</h2>
-  <a href="{% url 'clientes:cliente_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nuevo Cliente</a>
+  <a href="{% url 'clientes:cliente_create' %}" class="btn btn-primary">
+    <i class="bi bi-plus-lg"></i> Nuevo Cliente
+  </a>
 </div>
 
+<!-- Filtro activos/inactivos/todos -->
+<div class="btn-group mb-3" role="group">
+    <a href="?activo=activos&search={{ search }}&per_page={{ per_page }}" class="btn btn-sm {% if filtro_activo == 'activos' %}btn-primary{% else %}btn-outline-primary{% endif %}">Activos</a>
+    <a href="?activo=inactivos&search={{ search }}&per_page={{ per_page }}" class="btn btn-sm {% if filtro_activo == 'inactivos' %}btn-danger{% else %}btn-outline-danger{% endif %}">Inactivos</a>
+    <a href="?activo=todos&search={{ search }}&per_page={{ per_page }}" class="btn btn-sm {% if filtro_activo == 'todos' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">Todos</a>
+</div>
+
+<!-- Búsqueda y selector de registros por página -->
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-6">
-    <input type="text" name="search" class="form-control" placeholder="Buscar..." value="{{ search }}">
+    <input type="text" name="search" class="form-control" placeholder="Buscar por nombre, teléfono o cédula" value="{{ search }}">
   </div>
   <div class="col-auto">
     <button type="submit" class="btn btn-secondary">Buscar</button>
   </div>
+  <div class="col-auto ms-auto">
+    <label class="me-2">Mostrar:</label>
+    <select name="per_page" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+        <option value="20" {% if per_page == '20' %}selected{% endif %}>20</option>
+        <option value="50" {% if per_page == '50' %}selected{% endif %}>50</option>
+        <option value="100" {% if per_page == '100' %}selected{% endif %}>100</option>
+    </select>
+  </div>
+  <input type="hidden" name="activo" value="{{ filtro_activo }}">
+  <input type="hidden" name="order_by" value="{{ request.GET.order_by }}">
+  <input type="hidden" name="dir" value="{{ request.GET.dir }}">
 </form>
 
+<!-- Tabla de clientes con encabezados ordenables -->
 <table class="table table-striped table-hover">
   <thead class="table-dark">
     <tr>
-      <th>Nombre</th>
-      <th>Teléfono</th>
-      <th>Cédula</th>
+      <th>
+        <a href="?order_by=nombre&dir={% if request.GET.order_by == 'nombre' and request.GET.dir != 'desc' %}desc{% else %}asc{% endif %}&search={{ search }}&activo={{ filtro_activo }}&per_page={{ per_page }}" class="text-white text-decoration-none">
+          Nombre {% if request.GET.order_by == 'nombre' %}<i class="bi bi-arrow-{% if request.GET.dir == 'desc' %}down{% else %}up{% endif %}"></i>{% endif %}
+        </a>
+      </th>
+      <th>
+        <a href="?order_by=telefono&dir={% if request.GET.order_by == 'telefono' and request.GET.dir != 'desc' %}desc{% else %}asc{% endif %}&search={{ search }}&activo={{ filtro_activo }}&per_page={{ per_page }}" class="text-white text-decoration-none">
+          Teléfono {% if request.GET.order_by == 'telefono' %}<i class="bi bi-arrow-{% if request.GET.dir == 'desc' %}down{% else %}up{% endif %}"></i>{% endif %}
+        </a>
+      </th>
+      <th>
+        <a href="?order_by=cedula&dir={% if request.GET.order_by == 'cedula' and request.GET.dir != 'desc' %}desc{% else %}asc{% endif %}&search={{ search }}&activo={{ filtro_activo }}&per_page={{ per_page }}" class="text-white text-decoration-none">
+          Cédula {% if request.GET.order_by == 'cedula' %}<i class="bi bi-arrow-{% if request.GET.dir == 'desc' %}down{% else %}up{% endif %}"></i>{% endif %}
+        </a>
+      </th>
       <th>Acciones</th>
     </tr>
   </thead>
@@ -30,10 +64,16 @@
       <td>{{ cliente.telefono }}</td>
       <td>{{ cliente.cedula|default:"-" }}</td>
       <td>
-        <a href="{% url 'clientes:cliente_detail' cliente.pk %}" class="btn btn-sm btn-info"><i class="bi bi-eye"></i></a>
-        <a href="{% url 'clientes:cliente_update' cliente.pk %}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
+        <a href="{% url 'clientes:cliente_detail' cliente.pk %}" class="btn btn-sm btn-info" title="Ver detalle">
+          <i class="bi bi-eye"></i>
+        </a>
+        <a href="{% url 'clientes:cliente_update' cliente.pk %}" class="btn btn-sm btn-warning" title="Editar">
+          <i class="bi bi-pencil"></i>
+        </a>
         {% if request.user.rol.nombre != 'Recepcionista' %}
-        <a href="{% url 'clientes:cliente_delete' cliente.pk %}" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+        <a href="{% url 'clientes:cliente_delete' cliente.pk %}" class="btn btn-sm btn-danger" title="Desactivar">
+          <i class="bi bi-trash"></i>
+        </a>
         {% endif %}
       </td>
     </tr>
@@ -44,4 +84,6 @@
     {% endfor %}
   </tbody>
 </table>
-{% endblock %}
+
+{% include 'includes/pagination.html' %}
+{% endblock content %}

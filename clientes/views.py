@@ -11,6 +11,8 @@ from .forms import ClienteForm, VehiculoForm
 from core.mixins import TienePermisoMixin
 from django.http import JsonResponse
 from .models import ModeloVehiculo
+from core.mixins import TienePermisoMixin, OrdenYPaginacionMixin
+from django.db.models import Q
 
 def get_modelos_por_marca(request):
     marca_id = request.GET.get('marca_id')
@@ -20,15 +22,22 @@ def get_modelos_por_marca(request):
     return JsonResponse([], safe=False)
 
 # --- Vistas de Cliente ---
-class ClienteListView(LoginRequiredMixin, ListView):
-    """Muestra la lista de clientes activos con búsqueda y paginación."""
+class ClienteListView(LoginRequiredMixin, OrdenYPaginacionMixin, ListView):
     model = Cliente
     template_name = 'clientes/cliente_list.html'
     context_object_name = 'clientes'
-    paginate_by = 20
+    ordering_allowed = {'nombre': 'nombre', 'telefono': 'telefono', 'cedula': 'cedula'}
+    ordering_default = 'nombre'
 
     def get_queryset(self):
-        queryset = Cliente.objects.filter(activo=True)
+        queryset = Cliente.objects.all()
+        # Filtro activos/inactivos
+        filtro_activo = self.request.GET.get('activo', 'activos')
+        if filtro_activo == 'activos':
+            queryset = queryset.filter(activo=True)
+        elif filtro_activo == 'inactivos':
+            queryset = queryset.filter(activo=False)
+        # Búsqueda
         search = self.request.GET.get('search', '')
         if search:
             queryset = queryset.filter(
@@ -41,6 +50,8 @@ class ClienteListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search'] = self.request.GET.get('search', '')
+        context['filtro_activo'] = self.request.GET.get('activo', 'activos')
+        context['per_page'] = self.request.GET.get('per_page', '20')
         return context
 
 
@@ -91,15 +102,15 @@ class ClienteDeleteView(LoginRequiredMixin, TienePermisoMixin, UpdateView):
 
 # --- Vistas de Vehículo ---
 
-class VehiculoListView(LoginRequiredMixin, ListView):
-    """Muestra la lista de vehículos activos con búsqueda y paginación."""
+class VehiculoListView(LoginRequiredMixin, OrdenYPaginacionMixin, ListView):
     model = Vehiculo
     template_name = 'clientes/vehiculo_list.html'
     context_object_name = 'vehiculos'
-    paginate_by = 20
+    ordering_allowed = {'placa': 'placa', 'marca__nombre': 'marca__nombre', 'modelo__nombre': 'modelo__nombre', 'anio': 'anio'}
+    ordering_default = 'placa'
 
     def get_queryset(self):
-        queryset = Vehiculo.objects.filter(activo=True).select_related('cliente')
+        queryset = Vehiculo.objects.filter(activo=True).select_related('cliente', 'marca', 'modelo')
         search = self.request.GET.get('search', '')
         if search:
             queryset = queryset.filter(
